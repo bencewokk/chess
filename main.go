@@ -12,9 +12,7 @@ import (
 
 var img *ebiten.Image
 
-type Game struct {
-	img *ebiten.Image
-}
+type Game struct{}
 
 func (g *Game) Update() error {
 	return nil
@@ -69,11 +67,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func main() {
 
 	//pos
-
-	img, _, err := ebitenutil.NewImageFromFile("redcar.png")
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	game := &Game{img: img}
 
