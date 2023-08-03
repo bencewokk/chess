@@ -1,2 +1,2 @@
 # chess
-work in progress <3
+work in progress 
