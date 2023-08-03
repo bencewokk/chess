@@ -1,17 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
-
-func say(str string) {
-	fmt.Println(str)
-}
 
 type Game struct{}
 
@@ -31,8 +26,30 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 	return 100 * 8, 100 * 8
 }
 
+func PosToId(pos pos) int {
+	id := pos.x/100 + pos.y/100*8
+
+	if id < 0 || id >= 64 {
+		log.Panic("PosToId: Invalid pos")
+	}
+
+	return id
+}
+
+func IdToPos(id int) pos {
+	if id < 0 || id >= 64 {
+		log.Panic("IdToPos: Invalid id")
+	}
+
+	x := (id % 8) * 100
+	y := (id / 8) * 100
+
+	return pos{x, y}
+}
+
 var (
 	firstPos     pos
+	curPos       pos
 	isFirstPress bool = true
 )
 
@@ -51,15 +68,37 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		offwhiteColor = color.RGBA{240, 220, 200, 255}
 	)
 
+	//BOARD
+
 	for i := 0; i < 64; i++ {
-		xcurs, ycurs := ebiten.CursorPosition()
-		pos := ebiten.DrawImageOptions{}
 
 		if (row+i)%2 == 0 {
 			ebitenutil.DrawRect(screen, x, y, width, height, greenColor)
 		} else {
 			ebitenutil.DrawRect(screen, x, y, width, height, offwhiteColor)
 		}
+
+		x += 100
+
+		if (i+1)%8 == 0 && i != 0 {
+			x = 0
+			y += 100
+
+			if row == 0 {
+				row++
+			} else {
+				row--
+			}
+		}
+	}
+
+	//CURSOR AND PIECES
+
+	for i := 0; i < 64; i++ {
+
+		xcurs, ycurs := ebiten.CursorPosition()
+		curPos = createPos(xcurs, ycurs)
+		pos := ebiten.DrawImageOptions{}
 
 		//fmt.Println(ebiten.IsMouseButtonPressed(ebiten.MouseButton0))
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == true &&
@@ -69,18 +108,33 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			firstPos.x = xcurs
 			firstPos.y = ycurs
 
-			say("pressed")
-			fmt.Println(firstPos)
+		}
+
+		if tablep[PosToId(curPos)].img != nil {
+			//fmt.Println(tablep[PosToId(curPos)].piece)
+		}
+
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == false &&
+			isFirstPress == false {
+			isFirstPress = true
+			if moveIsLegal(firstPos, curPos) == true {
+				tablep[PosToId(firstPos)].pos = IdToPos(PosToId(curPos))
+				tablep[PosToId(curPos)] = tablep[PosToId(firstPos)]
+				tablep[PosToId(firstPos)] = piece{}
+			}
 		}
 
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == false {
-			isFirstPress = true
+			tablep[i].offsetX, tablep[i].offsetY = 0, 0
 		} else {
-			fmt.Println(firstPos.x-xcurs, firstPos.y-ycurs, firstPos)
+			tablep[PosToId(firstPos)].offsetX, tablep[PosToId(firstPos)].offsetY =
+				firstPos.x-xcurs, firstPos.y-ycurs
 		}
 
 		if tablep[i].img != nil {
-			pos.GeoM.Translate(float64(tablep[i].x), float64(tablep[i].y))
+			pos.GeoM.Translate(
+				float64(tablep[i].pos.x-tablep[i].offsetX),
+				float64(tablep[i].pos.y-tablep[i].offsetY))
 			screen.DrawImage(tablep[i].img, &pos)
 		}
 
@@ -102,13 +156,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func main() {
 	game := &Game{}
 	tablepp := &tablep
-
 	*tablepp = fillTable(tableUnread)
-
-	fmt.Println(tablep)
-
 	ebiten.SetWindowSize(800, 800)
-
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}

@@ -34,14 +34,15 @@ var (
 )
 
 type piece struct {
-	x, y     int
-	piece    string
-	img      *ebiten.Image
-	legalIDs []int
+	pos              pos
+	piece            string
+	img              *ebiten.Image
+	offsetX, offsetY int
+	color            string
 }
 
-func createPiece(pieceType string, img *ebiten.Image, x, y int) piece {
-	return piece{piece: pieceType, img: img, x: x, y: y}
+func createPiece(pieceType string, img *ebiten.Image, x, y int, color string) piece {
+	return piece{piece: pieceType, img: img, pos: createPos(x, y), color: color}
 }
 
 func fillTable(table []string) []piece {
@@ -72,50 +73,50 @@ func fillTable(table []string) []piece {
 			u += 8
 
 		case "wr":
-			tablep[u] = createPiece("wr", wrook, x, y)
+			tablep[u] = createPiece("wr", wrook, x, y, "w")
 			u++
 		case "wq":
-			tablep[u] = createPiece("wq", wqueen, x, y)
+			tablep[u] = createPiece("wq", wqueen, x, y, "w")
 			u++
 
 		case "wp":
-			tablep[u] = createPiece("wp", wpawn, x, y)
+			tablep[u] = createPiece("wp", wpawn, x, y, "w")
 			u++
 
 		case "wk":
-			tablep[u] = createPiece("wk", wking, x, y)
+			tablep[u] = createPiece("wk", wking, x, y, "w")
 			u++
 
 		case "wn":
-			tablep[u] = createPiece("wn", wknight, x, y)
+			tablep[u] = createPiece("wn", wknight, x, y, "w")
 			u++
 
 		case "wb":
-			tablep[u] = createPiece("wb", wbishop, x, y)
+			tablep[u] = createPiece("wb", wbishop, x, y, "w")
 			u++
 
 		case "br":
-			tablep[u] = createPiece("br", brook, x, y)
+			tablep[u] = createPiece("br", brook, x, y, "b")
 			u++
 
 		case "bq":
-			tablep[u] = createPiece("bq", bqueen, x, y)
+			tablep[u] = createPiece("bq", bqueen, x, y, "b")
 			u++
 
 		case "bp":
-			tablep[u] = createPiece("bp", bpawn, x, y)
+			tablep[u] = createPiece("bp", bpawn, x, y, "b")
 			u++
 
 		case "bk":
-			tablep[u] = createPiece("bk", bking, x, y)
+			tablep[u] = createPiece("bk", bking, x, y, "b")
 			u++
 
 		case "bn":
-			tablep[u] = createPiece("bn", bknight, x, y)
+			tablep[u] = createPiece("bn", bknight, x, y, "b")
 			u++
 
 		case "bb":
-			tablep[u] = createPiece("bb", bbishop, x, y)
+			tablep[u] = createPiece("bb", bbishop, x, y, "b")
 			u++
 
 		}
@@ -123,8 +124,8 @@ func fillTable(table []string) []piece {
 		for i := 0; i < 64; i++ {
 
 			if tablep[i].img != nil {
-				tablep[i].x = x2
-				tablep[i].y = y2
+				tablep[i].pos.x = x2
+				tablep[i].pos.y = y2
 			}
 
 			x2 += 100
