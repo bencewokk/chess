@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type Game struct{}
@@ -47,10 +47,28 @@ func IdToPos(id int) pos {
 	return pos{x, y}
 }
 
+func callPopUps(screen *ebiten.Image) {
+	if len(popups) == 5 {
+		log.Println("callPopUps: No popups")
+	}
+
+	for i := 0; i < len(popups); i++ {
+		switch popups[i].ty {
+		case "piecrea":
+			if popups[i].color == "b" {
+				vector.DrawFilledRect(screen, 50, 50, 200, 200, color.Black, false)
+			}
+
+		}
+	}
+}
+
 var (
 	firstPos     pos
 	curPos       pos
 	isFirstPress bool = true
+
+	popups []popup
 )
 
 func (g *Game) Draw(screen *ebiten.Image) {
@@ -73,9 +91,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for i := 0; i < 64; i++ {
 
 		if (row+i)%2 == 0 {
-			ebitenutil.DrawRect(screen, x, y, width, height, greenColor)
+
+			vector.DrawFilledRect(screen, float32(x), float32(y), float32(width), float32(height), greenColor, false)
 		} else {
-			ebitenutil.DrawRect(screen, x, y, width, height, offwhiteColor)
+			vector.DrawFilledRect(screen, float32(x), float32(y), float32(width), float32(height), offwhiteColor, false)
 		}
 
 		x += 100
@@ -100,9 +119,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		curPos = createPos(xcurs, ycurs)
 		pos := ebiten.DrawImageOptions{}
 
-		//fmt.Println(ebiten.IsMouseButtonPressed(ebiten.MouseButton0))
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == true &&
-			isFirstPress == true {
+		//fmt.Println(ebiten.IsMouseButtonPressed(ebiten.MouseButton0)
+
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == true && isFirstPress == true {
 			isFirstPress = false
 
 			firstPos.x = xcurs
@@ -117,7 +136,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == false &&
 			isFirstPress == false {
 			isFirstPress = true
-			if moveIsLegal(firstPos, curPos) == true {
+			if moveIsLegal(firstPos, curPos, screen) == true {
 				tablep[PosToId(firstPos)].pos = IdToPos(PosToId(curPos))
 				tablep[PosToId(curPos)] = tablep[PosToId(firstPos)]
 				tablep[PosToId(firstPos)] = piece{}
@@ -150,6 +169,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				row--
 			}
 		}
+
+		callPopUps(screen)
 	}
 }
 
