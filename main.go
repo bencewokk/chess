@@ -118,10 +118,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		xcurs, ycurs := ebiten.CursorPosition()
 		curPos = createPos(xcurs, ycurs)
 		pos := ebiten.DrawImageOptions{}
-
-		//fmt.Println(ebiten.IsMouseButtonPressed(ebiten.MouseButton0)
-
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == true && isFirstPress == true {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) && isFirstPress {
 			isFirstPress = false
 
 			firstPos.x = xcurs
@@ -133,17 +130,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			//fmt.Println(tablep[PosToId(curPos)].piece)
 		}
 
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == false &&
-			isFirstPress == false {
+		if !ebiten.IsMouseButtonPressed(ebiten.MouseButton0) &&
+			!isFirstPress {
 			isFirstPress = true
-			if moveIsLegal(firstPos, curPos, screen) == true {
+			if moveIsLegal(firstPos, curPos) {
+				tablep[PosToId(firstPos)].moved = true
 				tablep[PosToId(firstPos)].pos = IdToPos(PosToId(curPos))
 				tablep[PosToId(curPos)] = tablep[PosToId(firstPos)]
 				tablep[PosToId(firstPos)] = piece{}
 			}
 		}
 
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButton0) == false {
+		if !ebiten.IsMouseButtonPressed(ebiten.MouseButton0) {
 			tablep[i].offsetX, tablep[i].offsetY = 0, 0
 		} else {
 			tablep[PosToId(firstPos)].offsetX, tablep[PosToId(firstPos)].offsetY =
@@ -151,9 +149,28 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		}
 
 		if tablep[i].img != nil {
+			// Get the original size of the image
+			width, height := tablep[i].img.Size()
+
+			// Desired size to draw the image
+			desiredWidth := 100.0
+			desiredHeight := 100.0
+
+			// Calculate scaling factors to resize the image to 100x100 pixels
+			scaleX := desiredWidth / float64(width)
+			scaleY := desiredHeight / float64(height)
+
+			// Apply scaling to the position options
+			pos.GeoM.Reset()               // Ensure we reset GeoM for each draw call
+			pos.GeoM.Scale(scaleX, scaleY) // Set the scaling factors
+
+			// Apply translation after scaling
 			pos.GeoM.Translate(
 				float64(tablep[i].pos.x-tablep[i].offsetX),
-				float64(tablep[i].pos.y-tablep[i].offsetY))
+				float64(tablep[i].pos.y-tablep[i].offsetY),
+			)
+
+			// Draw the resized and translated image on the screen
 			screen.DrawImage(tablep[i].img, &pos)
 		}
 

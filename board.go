@@ -18,19 +18,19 @@ var (
 
 	tablep []piece
 
-	wrook, _, _   = ebitenutil.NewImageFromFile("pieces/wrook.png")
-	wqueen, _, _  = ebitenutil.NewImageFromFile("pieces/wqueen.png")
-	wpawn, _, _   = ebitenutil.NewImageFromFile("pieces/wpawn.png")
-	wknight, _, _ = ebitenutil.NewImageFromFile("pieces/wknight.png")
-	wbishop, _, _ = ebitenutil.NewImageFromFile("pieces/wbishop.png")
-	wking, _, _   = ebitenutil.NewImageFromFile("pieces/wking.png")
+	wrook, _, _   = ebitenutil.NewImageFromFile("pieces/whiterook.jpg")
+	wqueen, _, _  = ebitenutil.NewImageFromFile("pieces/whitequeen.jpg")
+	wpawn, _, _   = ebitenutil.NewImageFromFile("pieces/whitepawn.jpg")
+	wknight, _, _ = ebitenutil.NewImageFromFile("pieces/whiteknight.jpg")
+	wbishop, _, _ = ebitenutil.NewImageFromFile("pieces/whitebishop.jpg")
+	wking, _, _   = ebitenutil.NewImageFromFile("pieces/whiteking.jpg")
 
-	brook, _, _   = ebitenutil.NewImageFromFile("pieces/brook.png")
-	bqueen, _, _  = ebitenutil.NewImageFromFile("pieces/bqueen.png")
-	bpawn, _, _   = ebitenutil.NewImageFromFile("pieces/bpawn.png")
-	bknight, _, _ = ebitenutil.NewImageFromFile("pieces/bknight.png")
-	bbishop, _, _ = ebitenutil.NewImageFromFile("pieces/bbishop.png")
-	bking, _, _   = ebitenutil.NewImageFromFile("pieces/bking.png")
+	brook, _, _   = ebitenutil.NewImageFromFile("pieces/blackrook.jpg")
+	bqueen, _, _  = ebitenutil.NewImageFromFile("pieces/blackqueen.jpg")
+	bpawn, _, _   = ebitenutil.NewImageFromFile("pieces/blackpawn.jpg")
+	bknight, _, _ = ebitenutil.NewImageFromFile("pieces/blackknight.jpg")
+	bbishop, _, _ = ebitenutil.NewImageFromFile("pieces/blackbishop.jpg")
+	bking, _, _   = ebitenutil.NewImageFromFile("pieces/blackking.jpg")
 )
 
 type piece struct {
@@ -39,6 +39,7 @@ type piece struct {
 	img              *ebiten.Image
 	offsetX, offsetY int
 	color            string
+	moved            bool
 }
 
 func createPiece(pieceType string, img *ebiten.Image, x, y int, color string) piece {
